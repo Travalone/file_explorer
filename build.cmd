@@ -1,0 +1,1 @@
+fyne package -appID org.travalone.file_explorer -name "File Explorer"  -icon ./resource/picture/icon.jpg -os windows

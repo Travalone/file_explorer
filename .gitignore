@@ -1,0 +1,4 @@
+.idea
+*.app
+*.exe
+.DS_Store
