@@ -1,6 +1,7 @@
 package packed_widgets
 
 import (
+	binding2 "file_explorer/view/packed_widgets/packed_binding"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"go.uber.org/atomic"
@@ -99,7 +100,7 @@ func (checkList *CheckList) CheckRange() {
 }
 
 func (checkList *CheckList) addChangeCallback(index int) {
-	NewListener(func() {
+	binding2.NewListener(func() {
 		if checkList.batchChanging {
 			//logger.Warn("batch changing")
 			return

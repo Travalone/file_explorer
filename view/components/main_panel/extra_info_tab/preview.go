@@ -1,13 +1,12 @@
 package extra_info_tab
 
 import (
-	"file_explorer/common"
 	"file_explorer/common/model"
 	"file_explorer/common/utils"
 	"file_explorer/view/packed_widgets"
+	"file_explorer/view/packed_widgets/packed_binding"
 	"file_explorer/view/store"
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 	"sort"
 	"strconv"
 	"strings"
@@ -53,13 +52,10 @@ func (preview *ExtraInfoPreview) onInputScoreChange() {
 		if newScore == "*" {
 			newScore = preview.tabContext.FileInfos[index].Original.GetScore()
 		}
-		if fileInfo.ExtraInfo == nil {
-			fileInfo.ExtraInfo = &model.FileExtraInfo{}
-		}
 		if newScore == "" {
-			fileInfo.ExtraInfo.Score = nil
+			fileInfo.SetScore(nil)
 		} else if s, err := strconv.Atoi(newScore); err == nil {
-			fileInfo.ExtraInfo.Score = &s
+			fileInfo.SetScore(&s)
 		}
 	}
 	preview.Table.Refresh()
@@ -81,11 +77,13 @@ func (preview *ExtraInfoPreview) onInputTagsChange() {
 				newTags = utils.MergeLists(newTags, []string{inputTag})
 			}
 		}
-		if fileInfo.ExtraInfo == nil {
-			fileInfo.ExtraInfo = &model.FileExtraInfo{}
-		}
-		sort.Strings(newTags)
-		fileInfo.ExtraInfo.Tags = newTags
+		sort.Slice(newTags, func(i, j int) bool {
+			if len(newTags[i]) == len(newTags[j]) {
+				return strings.ToLower(newTags[i]) < strings.ToLower(newTags[j])
+			}
+			return len(newTags[i]) < len(newTags[j])
+		})
+		fileInfo.SetTags(newTags)
 	}
 	preview.Table.Refresh()
 }
@@ -100,10 +98,22 @@ func (preview *ExtraInfoPreview) onInputNoteChange() {
 		if newNote == "*" {
 			newNote = preview.tabContext.FileInfos[index].Original.GetNote()
 		}
-		if fileInfo.ExtraInfo == nil {
-			fileInfo.ExtraInfo = &model.FileExtraInfo{}
+		fileInfo.SetNote(&newNote)
+	}
+	preview.Table.Refresh()
+}
+
+// EditForm url更新时回调
+func (preview *ExtraInfoPreview) onInputUrlChange() {
+	inputUrl, _ := preview.tabContext.InputUrl.Get()
+	checkIndexList := preview.CheckList.GetCheckIndexList()
+	for _, index := range checkIndexList {
+		fileInfo := preview.tabContext.FileInfos[index].New
+		newUrl := inputUrl
+		if newUrl == "*" {
+			newUrl = preview.tabContext.FileInfos[index].Original.GetUrl()
 		}
-		fileInfo.ExtraInfo.Note = &newNote
+		fileInfo.SetUrl(&newUrl)
 	}
 	preview.Table.Refresh()
 }
@@ -134,13 +144,7 @@ func NewExtraInfoPreview(tabContext *store.ExtraInfoTabContext) *ExtraInfoPrevie
 					}
 				},
 				GetIcon: func(data interface{}) fyne.Resource {
-					if data.(*model.FileInfo).Type == common.FILE_TYPE_DIR {
-						return theme.FolderIcon()
-					}
-					if data.(*model.FileInfo).Type == common.FILE_TYPE_DRIVER {
-						return theme.ComputerIcon()
-					}
-					return theme.FileIcon()
+					return data.(*model.FileInfo).GetIcon()
 				},
 			},
 			{
@@ -190,6 +194,11 @@ func NewExtraInfoPreview(tabContext *store.ExtraInfoTabContext) *ExtraInfoPrevie
 				GetText: func(data interface{}) string { return data.(*model.FileInfo).GetNote() },
 				Width:   300,
 			},
+			{
+				Header:  "链接",
+				GetText: func(data interface{}) string { return data.(*model.FileInfo).GetUrl() },
+				Width:   150,
+			},
 		},
 		func(index int) interface{} {
 			return tabContext.FileInfos[index].New
@@ -221,9 +230,10 @@ func NewExtraInfoPreview(tabContext *store.ExtraInfoTabContext) *ExtraInfoPrevie
 	}
 
 	// 预览列表extraInfo实时响应输入变化
-	packed_widgets.NewListener(preview.onInputScoreChange).BindData(tabContext.InputScore)
-	packed_widgets.NewListener(preview.onInputNoteChange).BindData(tabContext.InputNote)
-	packed_widgets.NewListener(preview.onInputTagsChange).BindData(tabContext.InputTags)
+	packed_binding.NewListener(preview.onInputScoreChange).BindData(tabContext.InputScore)
+	packed_binding.NewListener(preview.onInputNoteChange).BindData(tabContext.InputNote)
+	packed_binding.NewListener(preview.onInputTagsChange).BindData(tabContext.InputTags)
+	packed_binding.NewListener(preview.onInputUrlChange).BindData(tabContext.InputUrl)
 
 	return preview
 }

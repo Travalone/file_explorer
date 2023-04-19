@@ -4,6 +4,8 @@ import (
 	"file_explorer/common/logger"
 	"fmt"
 	"reflect"
+	"regexp"
+	"strings"
 )
 
 func Conv2Str(data interface{}) string {
@@ -38,7 +40,7 @@ func Conv2Str(data interface{}) string {
 		if dataStr, ok := data.(string); ok {
 			return dataStr
 		}
-		logger.Error("Conv2Str failed, data=%v, type=%s", data, reflect.TypeOf(data))
+		logger.Error("Conv2Str failed, data=%v, type=%v", data, reflect.TypeOf(data))
 		return fmt.Sprintf("%v", data)
 	}
 }
@@ -48,6 +50,22 @@ func PtrInt(num int) *int {
 }
 func PtrStr(str string) *string {
 	return &str
+}
+
+func ReplaceWrap(str string) string {
+	return strings.ReplaceAll(str, "\n", "\\n")
+}
+
+func ReplaceWildcard(str string, rule map[string]string) string {
+	pattern := regexp.MustCompile("{\\w+}")
+	matchList := pattern.FindAllString(str, -1)
+	for _, match := range matchList {
+		key := match[1 : len(match)-1]
+		if value, ok := rule[key]; ok {
+			str = strings.ReplaceAll(str, match, value)
+		}
+	}
+	return str
 }
 
 var SizeUnits = []string{"B", "K", "M", "G"}
@@ -60,4 +78,19 @@ func ConvSize(sizeB int64) string {
 		count++
 	}
 	return fmt.Sprintf("%.2f%s", size, SizeUnits[count])
+}
+
+func Strings2Interfaces(strings []string) []interface{} {
+	interfaces := make([]interface{}, len(strings))
+	for i, str := range strings {
+		interfaces[i] = str
+	}
+	return interfaces
+}
+func Interfaces2Strings(interfaces []interface{}) []string {
+	strings := make([]string, len(interfaces))
+	for i, item := range interfaces {
+		strings[i] = item.(string)
+	}
+	return strings
 }

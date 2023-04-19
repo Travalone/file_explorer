@@ -24,10 +24,11 @@ type ExtraInfoTabContext struct {
 	InputScore binding.String
 	InputTags  binding.StringList
 	InputNote  binding.String
+	InputUrl   binding.String
 }
 
 func (ctx *ExtraInfoTabContext) GetTabType() string {
-	return common.TAB_TYPE_EXTRA_INFO
+	return common.TabTypeExtraInfo
 }
 
 func (ctx *ExtraInfoTabContext) GetTabLabel() string {
@@ -46,13 +47,14 @@ func (ctx *ExtraInfoTabContext) SetTabItem(tabItem *container.TabItem) {
 // RefreshInputExtraInfo 根据preview内选中项目，刷新EditForm内显示的聚合数据
 func (ctx *ExtraInfoTabContext) RefreshInputExtraInfo() {
 	checkList, _ := ctx.CheckList.Get()
-	var score, note *string = nil, nil
+	var score, note, url *string = nil, nil, nil
 	var tags []string = nil
 	for _, checkItem := range checkList {
 		fileInfo := checkItem.(*model.PreviewFileInfo)
 		checkItemScore := fileInfo.New.GetScore()
 		checkItemTags := fileInfo.New.GetTagList()
 		checkItemNote := fileInfo.New.GetNote()
+		checkItemUrl := fileInfo.New.GetUrl()
 
 		// extraInfos单一值时正常显示，多个值时显示*
 		if score == nil {
@@ -72,6 +74,12 @@ func (ctx *ExtraInfoTabContext) RefreshInputExtraInfo() {
 		} else if *note != checkItemNote {
 			note = utils.PtrStr("*")
 		}
+
+		if url == nil {
+			url = &checkItemUrl
+		} else if *url != checkItemUrl {
+			url = utils.PtrStr("*")
+		}
 	}
 
 	// 空值处理
@@ -82,10 +90,14 @@ func (ctx *ExtraInfoTabContext) RefreshInputExtraInfo() {
 	if note == nil {
 		note = utils.PtrStr("")
 	}
+	if url == nil {
+		url = utils.PtrStr("")
+	}
 
 	ctx.InputScore.Set(*score)
 	ctx.InputTags.Set(tags)
 	ctx.InputNote.Set(*note)
+	ctx.InputUrl.Set(*url)
 }
 
 // SortFileInfos 文件列表排序
@@ -111,6 +123,7 @@ func NewExtraInfoTabContext(fileTabContext *FileTabContext) *ExtraInfoTabContext
 		InputScore: binding.NewString(),
 		InputTags:  binding.NewStringList(),
 		InputNote:  binding.NewString(),
+		InputUrl:   binding.NewString(),
 	}
 
 	// 删除最后一个item后tag编辑栏hList消失，但label还在，所以这里设置一个空item占位

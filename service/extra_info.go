@@ -9,112 +9,130 @@ import (
 	"gopkg.in/yaml.v3"
 	"os"
 	"sort"
+	"strings"
 	"time"
 )
 
 // FillFileExtraInfo 指定目录，填充fileInfo
 func FillFileExtraInfo(dir string, fileInfos []*model.FileInfo) {
-	metaData, err := ReadLatestMetaFile(dir)
+	extraInfo, err := ReadLatestExtraInfo(dir)
 	if err != nil {
-		logger.Debug("FillFileExtraInfo ReadMetaFile failed, dir=%v, err=%v", dir, err)
+		logger.Debug("FillFileExtraInfo ReadExtraInfo failed, dir=%v, err=%v", dir, err)
 		return
 	}
 
-	if metaData == nil || metaData.FileExtraInfos == nil {
+	if extraInfo == nil || extraInfo.FileExtraInfos == nil {
 		logger.Debug("FillFileExtraInfo no file_extra_infos, dir=%v", dir)
 		return
 	}
 
 	for _, fileInfo := range fileInfos {
-		if fileExtraInfo, ok := metaData.FileExtraInfos[fileInfo.Name]; ok {
+		if fileExtraInfo, ok := extraInfo.FileExtraInfos[fileInfo.Name]; ok {
 			fileInfo.ExtraInfo = fileExtraInfo
 		}
 	}
 }
 
-// GetMetaFiles 获取指定目录下的meta files
-func GetMetaFiles(path string) []*model.FileInfo {
-	metaDir := utils.PathJoin(path, common.META_DIR_NAME)
+// GetExtraInfoFiles 获取指定目录下的ExtraInfo files
+func GetExtraInfoFiles(dir string) []*model.FileInfo {
+	metaDir := utils.PathJoin(dir, common.MetaDateDirName)
 	dirEntries, err := os.ReadDir(metaDir)
-	if err != nil {
+	if err != nil || len(dirEntries) == 0 {
 		return nil
 	}
-	metaFileInterfaces := make([]interface{}, len(dirEntries))
-	for i, dirEntry := range dirEntries {
-		metaFileInterfaces[i] = buildFileInfo(metaDir, dirEntry)
+
+	extraInfoFileInterfaces := make([]interface{}, 0, len(dirEntries))
+	for _, dirEntry := range dirEntries {
+		if strings.HasPrefix(dirEntry.Name(), utils.GetPrefix(common.ExtraInfoFilename)) {
+			extraInfoFileInterfaces = append(extraInfoFileInterfaces, buildFileInfo(metaDir, dirEntry))
+		}
 	}
+
+	if len(extraInfoFileInterfaces) == 0 {
+		return nil
+	}
+
 	// 按修改时间倒序排列
-	sort.Slice(metaFileInterfaces, func(i, j int) bool {
-		a := metaFileInterfaces[i].(*model.FileInfo)
-		b := metaFileInterfaces[j].(*model.FileInfo)
+	sort.Slice(extraInfoFileInterfaces, func(i, j int) bool {
+		a := extraInfoFileInterfaces[i].(*model.FileInfo)
+		b := extraInfoFileInterfaces[j].(*model.FileInfo)
 		return a.ModifyTime.Unix() > b.ModifyTime.Unix()
 	})
 
-	metaFiles := make([]*model.FileInfo, len(dirEntries))
-	for i, metaFileInterface := range metaFileInterfaces {
-		metaFiles[i] = metaFileInterface.(*model.FileInfo)
+	extraInfoFiles := make([]*model.FileInfo, len(dirEntries))
+	for i, extraInfoFileInterface := range extraInfoFileInterfaces {
+		extraInfoFiles[i] = extraInfoFileInterface.(*model.FileInfo)
 	}
 
-	return metaFiles
+	return extraInfoFiles
 }
 
-// ReadLatestMetaFile 指定目录，读取最新的meta data
-func ReadLatestMetaFile(dir string) (*model.MetaData, error) {
-	// 获取最新的meta file
-	metaFilenames := GetMetaFiles(dir)
-	if len(metaFilenames) == 0 {
+// ReadLatestExtraInfo 指定目录，读取最新的extra info
+func ReadLatestExtraInfo(dir string) (*model.FileExtraInfoMap, error) {
+	// 获取最新的ExtraInfo file
+	extraInfoFiles := GetExtraInfoFiles(dir)
+	if len(extraInfoFiles) == 0 {
 		return nil, nil
 	}
 
-	return ReadMetaFile(metaFilenames[0].GetPath())
+	return ReadExtraInfo(extraInfoFiles[0].GetPath())
 }
 
-// ReadMetaFile 指定绝对路径，读取meta data
-func ReadMetaFile(path string) (*model.MetaData, error) {
-	// 读取meta文件
-	metaFileData, err := os.ReadFile(path)
+// ReadExtraInfo 指定绝对路径，读取extra info
+func ReadExtraInfo(path string) (*model.FileExtraInfoMap, error) {
+	// 读取ExtraInfo文件
+	extraInfoFileData, err := os.ReadFile(path)
 	if err != nil {
-		logger.Debug("ReadMetaFile ReadFile failed, path=%s, err=%s", path, err)
+		logger.Debug("ReadExtraInfo ReadFile failed, path=%v, err=%v", path, err)
 		return nil, err
 	}
 
 	// 反序列化
-	metaData := &model.MetaData{}
-	err = yaml.Unmarshal(metaFileData, metaData)
+	extraInfo := &model.FileExtraInfoMap{}
+	err = yaml.Unmarshal(extraInfoFileData, extraInfo)
 	if err != nil {
-		logger.Error("ReadMetaFile Unmarshal failed, err=%s", err)
+		logger.Error("ReadExtraInfo Unmarshal failed, err=%v", err)
 		return nil, err
 	}
 
-	return metaData, nil
+	return extraInfo, nil
 }
 
-// WriteMetaFile 指定目录，写入metaInfo
-func WriteMetaFile(path string, metaData *model.MetaData) error {
-	logger.Info("write meta file %v", metaData)
-	// meta配置序列化
-	bytes, err := yaml.Marshal(metaData)
-	if err != nil {
-		logger.Error("WriteMetaFile Marshal failed, metaData=%s, err=%s", metaData, err)
-		return err
-	}
-
-	metaDirPath := utils.PathJoin(path, common.META_DIR_NAME)
+// CreateMetaDirIfNotExist 在指定目录下创建meta目录(如果不存在)
+func CreateMetaDirIfNotExist(dir string) error {
+	metaDirPath := utils.PathJoin(dir, common.MetaDateDirName)
 	if !utils.PathExists(metaDirPath) {
 		err := os.Mkdir(metaDirPath, os.ModePerm)
 		if err != nil {
-			logger.Error("WriteMetaFile create dir failed, path=%s, err=%s", metaDirPath, err)
+			logger.Error("WriteExtraInfoFile create dir failed, path=%v, err=%v", metaDirPath, err)
 			return err
 		}
 	}
+	return nil
+}
 
-	// meta file名称，添加时间戳后缀
-	metaFilename := utils.AddSuffix(common.EXTRA_INFO_FILE_NAME, fmt.Sprintf(".%d", time.Now().Unix()))
-
-	// 写入meta文件
-	fp, err := os.OpenFile(utils.PathJoin(metaDirPath, metaFilename), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+// WriteExtraInfoFile 指定目录，写入ExtraInfo
+func WriteExtraInfoFile(dir string, extraInfo *model.FileExtraInfoMap) error {
+	logger.Info("write extra info file %v", extraInfo)
+	// ExtraInfo配置序列化
+	bytes, err := yaml.Marshal(extraInfo)
 	if err != nil {
-		logger.Error("WriteMetaFile WriteFile failed, path=%s, err=%s", path, err)
+		logger.Error("WriteExtraInfoFile Marshal failed, extraInfoMap=%v, err=%v", extraInfo, err)
+		return err
+	}
+
+	err = CreateMetaDirIfNotExist(dir)
+	if err != nil {
+		logger.Error("CreateMetaDirIfNotExist failed, dir=%v, err=%v", dir, err)
+		return err
+	}
+
+	extraInfoFilename := utils.AddSuffix(common.ExtraInfoFilename, fmt.Sprintf(".%d", time.Now().Unix()))
+
+	// 写入ExtraInfo文件
+	fp, err := os.OpenFile(utils.PathJoin(dir, common.MetaDateDirName, extraInfoFilename), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	if err != nil {
+		logger.Error("WriteExtraInfoFile WriteFile failed, dir=%v, err=%v", dir, err)
 		return err
 	}
 	defer fp.Close()

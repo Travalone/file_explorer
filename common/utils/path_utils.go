@@ -3,13 +3,8 @@ package utils
 import (
 	"os"
 	"path"
-	"runtime"
 	"strings"
 )
-
-func IsOsWindows() bool {
-	return runtime.GOOS == "windows"
-}
 
 func DealWithWindowsPath(path string) string {
 	if !IsOsWindows() || path == "/" {
@@ -46,6 +41,14 @@ func PathExists(path string) bool {
 	path = DealWithWindowsPath(path)
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
+}
+
+func GetPrefix(filename string) string {
+	index := strings.Index(filename, ".")
+	if index <= 0 {
+		return filename
+	}
+	return filename[:index]
 }
 
 func AddSuffix(filename string, suffix string) string {

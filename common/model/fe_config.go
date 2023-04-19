@@ -11,8 +11,9 @@ type Favorites struct {
 }
 
 type FileExplorerConfig struct {
-	Root      string       `yaml:"root"`
-	Favorites []*Favorites `yaml:"favorites,omitempty"`
+	Root              string       `yaml:"root"`
+	Favorites         []*Favorites `yaml:"favorites,omitempty"`
+	FavoritesNotExist byte         `yaml:"favorites_not_exist"`
 }
 
 func (config *FileExplorerConfig) AddFavorites(path string, name string) {
