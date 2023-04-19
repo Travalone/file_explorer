@@ -11,7 +11,7 @@ import (
 
 // QuerySubDirs 查询子目录
 func QuerySubDirs(dir string) ([]string, error) {
-	fileInfos, err := QueryPath(dir)
+	fileInfos, err := QueryFiles(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -26,10 +26,10 @@ func QuerySubDirs(dir string) ([]string, error) {
 	return subDirs, nil
 }
 
-// QueryPath 查询子文件
-func QueryPath(dir string) ([]*model.FileInfo, error) {
+// QueryFiles 查询子文件 (包含目录)
+func QueryFiles(dir string) ([]*model.FileInfo, error) {
 	dir = utils.DealWithWindowsPath(dir)
-	logger.Debug("QueryPath dir=%s", dir)
+	logger.Debug("QueryFiles dir=%v", dir)
 
 	if utils.IsOsWindows() && dir == "/" {
 		return getWindowsDrives()
@@ -38,7 +38,7 @@ func QueryPath(dir string) ([]*model.FileInfo, error) {
 	// 读取目录
 	dirEntries, err := os.ReadDir(dir)
 	if err != nil {
-		logger.Error("QueryPath ReadFile failed, dir=%s, err=%s", dir, err)
+		logger.Error("QueryFiles ReadFile failed, dir=%v, err=%v", dir, err)
 		return nil, err
 	}
 
@@ -53,6 +53,7 @@ func QueryPath(dir string) ([]*model.FileInfo, error) {
 	return fileInfos, nil
 }
 
+// 获取windows驱动列表
 func getWindowsDrives() ([]*model.FileInfo, error) {
 	partitions, err := disk.Partitions(false)
 	if err != nil {
@@ -63,7 +64,7 @@ func getWindowsDrives() ([]*model.FileInfo, error) {
 	for i, partition := range partitions {
 		drives[i] = &model.FileInfo{
 			Name: partition.Mountpoint,
-			Type: common.FILE_TYPE_DRIVER,
+			Type: common.FileTypeDriver,
 		}
 	}
 	return drives, nil
@@ -78,12 +79,12 @@ func buildFileInfo(dir string, entry os.DirEntry) *model.FileInfo {
 	fileInfo := &model.FileInfo{
 		Name:       entry.Name(),
 		Dir:        dir,
-		Type:       common.FILE_TYPE_REGULAR,
+		Type:       common.FileTypeRegular,
 		Size:       rawInfo.Size(),
 		ModifyTime: rawInfo.ModTime(),
 	}
 	if entry.IsDir() {
-		fileInfo.Type = common.FILE_TYPE_DIR
+		fileInfo.Type = common.FileTypeDir
 	}
 	return fileInfo
 }

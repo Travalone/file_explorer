@@ -2,7 +2,7 @@ package extra_info_tab
 
 import (
 	"file_explorer/common"
-	"file_explorer/view/packed_widgets"
+	"file_explorer/view/packed_widgets/packed_binding"
 	"file_explorer/view/store"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -21,7 +21,7 @@ type ExtraInfoTab struct {
 }
 
 func (tab *ExtraInfoTab) GetTabLabel() string {
-	return common.TAB_TYPE_EXTRA_INFO
+	return common.TabTypeExtraInfo
 }
 
 func (tab *ExtraInfoTab) GetContainer() *fyne.Container {
@@ -48,7 +48,7 @@ func NewEditExtraInfoTab(feContext *store.FeContext, extraInfoTabContext *store.
 	}
 
 	// preview内选中文件改变时回调
-	packed_widgets.NewListener(func() {
+	packed_binding.NewListener(func() {
 		// 选中项更新时刷新状态栏
 		tab.statusBar.RefreshStatus()
 		// EditForm 聚合值刷新

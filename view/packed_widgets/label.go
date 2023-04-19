@@ -7,9 +7,10 @@ import (
 )
 
 type Label struct {
-	widget.Label   // 不能用指针，否则table滚动时数据会乱
-	OnTapped       func()
-	OnDoubleTapped func()
+	widget.Label             // 不能用指针，否则table滚动时数据会乱
+	OnTapped          func() // 单击回调函数
+	OnDoubleTapped    func() // 双击回调函数
+	OnTappedSecondary func() // 右键单击回调函数
 }
 
 func GetMinWidth(text string) float32 {
@@ -35,6 +36,7 @@ func (label *Label) SetTextWithFixWidth(text interface{}, width float32) {
 
 func (label *Label) SetText(text interface{}) {
 	t := utils.Conv2Str(text)
+	t = utils.ReplaceWrap(t)
 	if label.Label.Text != t {
 		label.Label.SetText(t)
 	}
@@ -49,6 +51,12 @@ func (label *Label) Tapped(*fyne.PointEvent) {
 func (label *Label) DoubleTapped(*fyne.PointEvent) {
 	if label.OnDoubleTapped != nil {
 		label.OnDoubleTapped()
+	}
+}
+
+func (label *Label) TappedSecondary(*fyne.PointEvent) {
+	if label.OnTappedSecondary != nil {
+		label.OnTappedSecondary()
 	}
 }
 

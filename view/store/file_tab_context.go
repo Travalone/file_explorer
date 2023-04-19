@@ -5,7 +5,7 @@ import (
 	"file_explorer/common/model"
 	"file_explorer/common/utils"
 	"file_explorer/service"
-	"file_explorer/view/packed_widgets"
+	"file_explorer/view/packed_widgets/packed_binding"
 	"fmt"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
@@ -14,14 +14,14 @@ import (
 
 type FileTabContext struct {
 	tabItem   *container.TabItem
-	Dirs      *packed_widgets.BindingStringList
+	Dirs      *packed_binding.BindingList
 	FileInfos []*model.FileInfo
 	CheckList binding.UntypedList
 	FeContext *FeContext
 }
 
 func (ctx *FileTabContext) GetTabType() string {
-	return common.TAB_TYPE_FILE
+	return common.TabTypeFile
 }
 
 func (ctx *FileTabContext) GetTabLabel() string {
@@ -39,7 +39,7 @@ func (ctx *FileTabContext) SetTabItem(tabItem *container.TabItem) {
 
 func (ctx *FileTabContext) GetDirs() []string {
 	dirs := ctx.Dirs.Get()
-	return dirs
+	return utils.Interfaces2Strings(dirs)
 }
 
 // GetAbsolutePath 获取当前绝对路径
@@ -126,7 +126,7 @@ func (ctx *FileTabContext) FilterTags(filterTags []string, andOr bool) error {
 func (ctx *FileTabContext) queryPath(dirs []string) ([]string, []*model.FileInfo) {
 	for true {
 		path := utils.PathJoin(dirs...)
-		fileInfos, err := service.QueryPath(path)
+		fileInfos, err := service.QueryFiles(path)
 		if err == nil {
 			return utils.PathSplit(path), fileInfos
 		}
@@ -166,7 +166,7 @@ func (ctx *FileTabContext) Back(index int) {
 func (ctx *FileTabContext) setDirs(dirs []string) {
 	dirs, fileInfos := ctx.queryPath(dirs)
 	service.FillFileExtraInfo(utils.PathJoin(dirs...), fileInfos)
-	ctx.Dirs.Set(dirs)
+	ctx.Dirs.Set(utils.Strings2Interfaces(dirs))
 	ctx.FileInfos = fileInfos
 	ctx.CheckList.Set(make([]interface{}, 0))
 	if ctx.tabItem != nil {
@@ -177,7 +177,7 @@ func (ctx *FileTabContext) setDirs(dirs []string) {
 func NewFileTabContext(path string, feContext *FeContext) *FileTabContext {
 	dirs := utils.PathSplit(path)
 	tabContext := &FileTabContext{
-		Dirs:      packed_widgets.NewBindingStringList(dirs),
+		Dirs:      packed_binding.NewBindingList(utils.Strings2Interfaces(dirs)),
 		CheckList: binding.NewUntypedList(),
 		FeContext: feContext,
 	}

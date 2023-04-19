@@ -3,6 +3,7 @@ package main_panel
 import (
 	"file_explorer/common"
 	"file_explorer/view/components/main_panel/extra_info_tab"
+	"file_explorer/view/components/main_panel/file_create_tab"
 	"file_explorer/view/components/main_panel/file_tab"
 	"file_explorer/view/store"
 	"fyne.io/fyne/v2"
@@ -23,13 +24,17 @@ type MainPanel struct {
 // newTabItem 新增tab上下文，创建TabItem
 func (panel *MainPanel) newTabItem(feContext *store.FeContext, tabContext store.TabContext) *container.TabItem {
 	var tab FeTab
-	icon := theme.FolderOpenIcon()
+	var icon fyne.Resource
 	switch tabContext.GetTabType() {
-	case common.TAB_TYPE_FILE:
+	case common.TabTypeFile:
+		icon = theme.FolderOpenIcon()
 		tab, _ = file_tab.NewFileTab(tabContext.(*store.FileTabContext), panel.DocTabs.Refresh)
-	case common.TAB_TYPE_EXTRA_INFO:
+	case common.TabTypeExtraInfo:
 		icon = theme.DocumentCreateIcon()
 		tab = extra_info_tab.NewEditExtraInfoTab(feContext, tabContext.(*store.ExtraInfoTabContext))
+	case common.TabTypeFileCreate:
+		icon = theme.FolderNewIcon()
+		tab = file_create_tab.NewFileCreateTab(feContext, tabContext.(*store.FileCreateTabContext))
 	}
 	tabItem := container.NewTabItemWithIcon(tabContext.GetTabLabel(), icon, tab.GetContainer())
 	tabContext.SetTabItem(tabItem)

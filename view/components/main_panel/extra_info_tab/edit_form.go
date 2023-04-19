@@ -29,11 +29,11 @@ type ExtraInfoEditForm struct {
 // 评分输入栏
 func (form *ExtraInfoEditForm) newScoreEditBox() fyne.CanvasObject {
 	scoreBox := widget.NewEntryWithData(form.tabContext.InputScore)
-	scoreBox.Validator = func(s string) error {
-		if s == "*" || s == "" {
+	scoreBox.Validator = func(score string) error {
+		if score == "*" || score == "" {
 			return nil
 		}
-		if _, e := strconv.Atoi(s); e == nil {
+		if _, e := strconv.Atoi(score); e == nil {
 			return nil
 		}
 		return common.NewError("Input score is not number")
@@ -66,7 +66,12 @@ func (form *ExtraInfoEditForm) newTagInputBox() *widget.Entry {
 		// 被选中项合并tag，同步到context
 		oldInputTags, _ := form.tabContext.InputTags.Get()
 		newInputTags := utils.MergeLists(oldInputTags[1:], []string{tag})
-		sort.Strings(newInputTags)
+		sort.Slice(newInputTags, func(i, j int) bool {
+			if len(newInputTags[i]) == len(newInputTags[j]) {
+				return strings.ToLower(newInputTags[i]) < strings.ToLower(newInputTags[j])
+			}
+			return len(newInputTags[i]) < len(newInputTags[j])
+		})
 		newInputTags = append(store.DefaultTagList, newInputTags...)
 		form.tabContext.InputTags.Set(newInputTags)
 		// 清除输入
@@ -112,30 +117,39 @@ func (form *ExtraInfoEditForm) newTagsEditBox() fyne.CanvasObject {
 func (form *ExtraInfoEditForm) newNoteEditBox() fyne.CanvasObject {
 	noteBox := widget.NewEntry()
 	noteBox.Bind(form.tabContext.InputNote)
-	noteBox.Validator = func(s string) error {
+	noteBox.Validator = func(note string) error {
+		note = strings.TrimSpace(note)
 		// note不超过300字符
-		if utf8.RuneCountInString(s) > 300 {
+		if utf8.RuneCountInString(note) > 300 {
 			return common.NewError("over length")
 		}
 		return nil
 	}
+	noteBox.MultiLine = true
 	noteBox.SetMinRowsVisible(4)
 	noteBox.Wrapping = fyne.TextWrapBreak //自动换行
 	return noteBox
 }
 
+// 链接输入栏
+func (form *ExtraInfoEditForm) newUrlEditBox() fyne.CanvasObject {
+	urlBox := widget.NewEntry()
+	urlBox.Bind(form.tabContext.InputUrl)
+	return urlBox
+}
+
 // SubmitExtraInfo 提交ExtraInfo改动
 func (form *ExtraInfoEditForm) SubmitExtraInfo() error {
-	metaData, _ := service.ReadLatestMetaFile(form.tabContext.Path)
-	if metaData == nil {
-		metaData = &model.MetaData{}
+	extraInfo, _ := service.ReadLatestExtraInfo(form.tabContext.Path)
+	if extraInfo == nil {
+		extraInfo = &model.FileExtraInfoMap{}
 	}
 
 	for _, fileInfo := range form.tabContext.FileInfos {
-		metaData.SetFileExtraInfo(fileInfo.New.Name, fileInfo.New.ExtraInfo)
+		extraInfo.SetFileExtraInfo(fileInfo.New)
 	}
 
-	return service.WriteMetaFile(form.tabContext.Path, metaData)
+	return service.WriteExtraInfoFile(form.tabContext.Path, extraInfo)
 }
 
 func NewExtraInfoEditForm(tabContext *store.ExtraInfoTabContext, preview *ExtraInfoPreview) *ExtraInfoEditForm {
@@ -172,6 +186,7 @@ func NewExtraInfoEditForm(tabContext *store.ExtraInfoTabContext, preview *ExtraI
 	form.Append("评分", form.newScoreEditBox())
 	form.Append("标签", form.newTagsEditBox())
 	form.Append("备注", form.newNoteEditBox())
+	form.Append("链接", form.newUrlEditBox())
 
 	return form
 }

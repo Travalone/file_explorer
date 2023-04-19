@@ -2,7 +2,7 @@ package file_tab
 
 import (
 	"file_explorer/common"
-	"file_explorer/view/packed_widgets"
+	"file_explorer/view/packed_widgets/packed_binding"
 	"file_explorer/view/store"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -21,7 +21,7 @@ type FileTab struct {
 }
 
 func (tab *FileTab) GetTabLabel() string {
-	return common.TAB_TYPE_FILE
+	return common.TabTypeFile
 }
 
 func (tab *FileTab) GetContainer() *fyne.Container {
@@ -62,7 +62,7 @@ func NewFileTab(fileTabContext *store.FileTabContext, tabRefresh func()) (tab *F
 	tab.tabContext.RefreshPath()
 
 	// 文件列表选中状态更新时，刷新状态栏、工具栏
-	packed_widgets.NewListener(func() {
+	packed_binding.NewListener(func() {
 		tab.StatusBar.RefreshStatus()
 		tab.ToolBar.refreshButton()
 	}).BindData(tab.tabContext.CheckList)
