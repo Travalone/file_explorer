@@ -6,7 +6,6 @@ import (
 	"file_explorer/view/packed_widgets"
 	"file_explorer/view/store"
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/theme"
 	"strings"
 )
 
@@ -57,13 +56,7 @@ func NewFileList(tabContext *store.FileTabContext) *FileList {
 					}
 				},
 				GetIcon: func(data interface{}) fyne.Resource {
-					if data.(*model.FileInfo).Type == common.FILE_TYPE_DIR {
-						return theme.FolderIcon()
-					}
-					if data.(*model.FileInfo).Type == common.FILE_TYPE_DRIVER {
-						return theme.ComputerIcon()
-					}
-					return theme.FileIcon()
+					return data.(*model.FileInfo).GetIcon()
 				},
 			},
 			{
@@ -102,7 +95,7 @@ func NewFileList(tabContext *store.FileTabContext) *FileList {
 							return a.Type < b.Type
 						}
 
-						if a.Type == common.FILE_TYPE_REGULAR && a.Size != b.Size {
+						if a.Type == common.FileTypeRegular && a.Size != b.Size {
 							if desc {
 								return a.Size > b.Size
 							}

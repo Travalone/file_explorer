@@ -33,7 +33,7 @@ func (walker *PathWalker) Start() {
 		var err error
 
 		for _, fileInfo := range walker.fileInfos {
-			if fileInfo.Type == common.FILE_TYPE_REGULAR {
+			if fileInfo.Type == common.FileTypeRegular {
 				// 文件直接累加
 				regularCount += 1
 				size += fileInfo.Size

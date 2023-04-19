@@ -18,7 +18,7 @@ func getWorkDir() string {
 	if !utils.PathExists(workDir) {
 		err := os.Mkdir(workDir, os.ModePerm)
 		if err != nil {
-			logger.Error("Create work dir failed, workDir=%s, err=%s", workDir, err)
+			logger.Error("Create work dir failed, workDir=%v, err=%v", workDir, err)
 			return ""
 		}
 	}
@@ -28,7 +28,7 @@ func getWorkDir() string {
 func ReadConfig() *model.FileExplorerConfig {
 	configData, err := os.ReadFile(utils.PathJoin(getWorkDir(), "conf.yml"))
 	if err != nil {
-		logger.Error("ReadConfig failed err=%s", err)
+		logger.Error("ReadConfig failed err=%v", err)
 		return &model.FileExplorerConfig{Root: "/"}
 	}
 
@@ -36,7 +36,7 @@ func ReadConfig() *model.FileExplorerConfig {
 	config := &model.FileExplorerConfig{}
 	err = yaml.Unmarshal(configData, config)
 	if err != nil {
-		logger.Error("ReadConfig unmarshal failed, err=%s", err)
+		logger.Error("ReadConfig unmarshal failed, err=%v", err)
 		return &model.FileExplorerConfig{Root: "/"}
 	}
 	return config
@@ -47,14 +47,14 @@ func WriteConfig(config *model.FileExplorerConfig) error {
 	// 序列化
 	bytes, err := yaml.Marshal(config)
 	if err != nil {
-		logger.Error("WriteConfig Marshal failed, config=%s, err=%s", config, err)
+		logger.Error("WriteConfig Marshal failed, config=%v, err=%v", config, err)
 		return err
 	}
 
 	// 写入
 	fp, err := os.OpenFile(utils.PathJoin(getWorkDir(), "conf.yml"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
-		logger.Error("WriteConfig WriteFile failed, err=%s", err)
+		logger.Error("WriteConfig WriteFile failed, err=%v", err)
 		return err
 	}
 	defer fp.Close()

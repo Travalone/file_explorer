@@ -16,8 +16,7 @@ func NewPathBar(tabContext *store.FileTabContext) *PathBar {
 		HList: packed_widgets.NewHList(
 			0,
 			func(index int) string {
-				tags := tabContext.Dirs.Get()
-				return tags[index]
+				return tabContext.Dirs.GetIndex(index).(string)
 			},
 			func() int {
 				return tabContext.Dirs.Length()

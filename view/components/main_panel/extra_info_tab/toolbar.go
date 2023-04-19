@@ -18,29 +18,28 @@ func newLoadHistoryButton(preview *ExtraInfoPreview) *widget.Button {
 	popUp := packed_widgets.NewPopUp(historyButton, container.NewVScroll(history))
 	popUp.Resize(fyne.NewSize(200, 300))
 
-	metaFileInfos := service.GetMetaFiles(preview.tabContext.Path)
-	for _, item := range metaFileInfos {
-		metaFileInfo := item
-		button := widget.NewButton(metaFileInfo.GetModifyTime(), nil)
+	extraInfoFiles := service.GetExtraInfoFiles(preview.tabContext.Path)
+	for _, item := range extraInfoFiles {
+		extraInfoFile := item
+		button := widget.NewButton(extraInfoFile.GetModifyTime(), nil)
 		button.OnTapped = func() {
-			// 读取指定metaFile
-			metaPath := metaFileInfo.GetPath()
-			metaData, err := service.ReadMetaFile(metaPath)
+			// 读取指定ExtraInfo文件
+			extraInfoPath := extraInfoFile.GetPath()
+			extraInfo, err := service.ReadExtraInfo(extraInfoPath)
 			if err != nil {
-				logger.Error("newLoadHistoryButton ReadMetaFile failed, path=%v", metaPath)
+				logger.Error("newLoadHistoryButton ReadExtraInfo failed, path=%v", extraInfoPath)
 				return
 			}
-			logger.Debug("load extra info history, time=%v, path=%v, metaData=%v", metaFileInfo.GetModifyTime(), metaPath, metaData)
 
-			if metaData.FileExtraInfos == nil {
-				metaData.FileExtraInfos = make(map[string]*model.FileExtraInfo)
+			if extraInfo.FileExtraInfos == nil {
+				extraInfo.FileExtraInfos = make(map[string]*model.FileExtraInfo)
 			}
 
 			// 加载extraInfo
 			for _, fileInfo := range preview.tabContext.FileInfos {
 				fileInfo.New.ExtraInfo = &model.FileExtraInfo{}
-				if metaData.FileExtraInfos[fileInfo.New.Name] != nil {
-					fileInfo.New.ExtraInfo = metaData.FileExtraInfos[fileInfo.New.Name]
+				if extraInfo.FileExtraInfos[fileInfo.New.Name] != nil {
+					fileInfo.New.ExtraInfo = extraInfo.FileExtraInfos[fileInfo.New.Name]
 				}
 			}
 
