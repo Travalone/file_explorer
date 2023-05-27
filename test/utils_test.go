@@ -12,3 +12,7 @@ func TestWildcard(t *testing.T) {
 	})
 	logger.Info("%v", str)
 }
+
+func TestCmd(t *testing.T) {
+	utils.RunCommand(utils.GetExplorerCommand(), "E://")
+}

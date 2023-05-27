@@ -1,6 +1,7 @@
 package test
 
 import (
+	"file_explorer/service"
 	"os"
 	"testing"
 )
@@ -13,4 +14,9 @@ func TestDeleteFile(t *testing.T) {
 	//if err != nil {
 	//	return
 	//}
+}
+
+func TestOpenUrl(t *testing.T) {
+	service.OpenUrlsWithDefaultWebExplorer([]string{"baidu.com"})
+	service.OpenPathWithDefaultFileExplorer("E://")
 }
