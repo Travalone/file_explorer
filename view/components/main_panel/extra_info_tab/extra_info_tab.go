@@ -52,7 +52,7 @@ func NewEditExtraInfoTab(feContext *store.FeContext, extraInfoTabContext *store.
 		// 选中项更新时刷新状态栏
 		tab.statusBar.RefreshStatus()
 		// EditForm 聚合值刷新
-		tab.editForm.TagList.Refresh()
+		tab.editForm.TagList.RefreshData()
 	}).BindData(tab.tabContext.CheckList)
 
 	// 默认全选
