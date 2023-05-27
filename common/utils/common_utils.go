@@ -32,6 +32,10 @@ func GetExplorerCommand() string {
 }
 
 func RunCommand(name string, args ...string) error {
+	if IsOsWindows() {
+		args = append([]string{"/C", name}, args...)
+		name = "cmd"
+	}
 	cmd := exec.Command(name, args...)
 	err := cmd.Run()
 	if err != nil {

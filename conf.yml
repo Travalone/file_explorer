@@ -1,2 +1,5 @@
 root: /
+favorites:
+    - path: Y:/_audit/漫之学园
+      name: 漫之学园
 favorites_not_exist: 0
