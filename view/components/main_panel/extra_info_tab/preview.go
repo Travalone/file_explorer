@@ -50,7 +50,7 @@ func (preview *ExtraInfoPreview) onInputScoreChange() {
 		fileInfo := preview.tabContext.FileInfos[index].New
 		newScore := inputScore
 		if newScore == "*" {
-			newScore = preview.tabContext.FileInfos[index].Original.GetScore()
+			newScore = preview.tabContext.FileInfos[index].New.GetScore()
 		}
 		if newScore == "" {
 			fileInfo.SetScore(nil)
@@ -71,7 +71,7 @@ func (preview *ExtraInfoPreview) onInputTagsChange() {
 		newTags := make([]string, 0)
 		for _, inputTag := range inputTags {
 			if inputTag == "*" {
-				oldTags := preview.tabContext.FileInfos[index].Original.GetTagList()
+				oldTags := preview.tabContext.FileInfos[index].New.GetTagList()
 				newTags = utils.MergeLists(newTags, oldTags)
 			} else {
 				newTags = utils.MergeLists(newTags, []string{inputTag})
@@ -96,7 +96,7 @@ func (preview *ExtraInfoPreview) onInputNoteChange() {
 		fileInfo := preview.tabContext.FileInfos[index].New
 		newNote := inputNote
 		if newNote == "*" {
-			newNote = preview.tabContext.FileInfos[index].Original.GetNote()
+			newNote = preview.tabContext.FileInfos[index].New.GetNote()
 		}
 		fileInfo.SetNote(&newNote)
 	}
@@ -111,7 +111,7 @@ func (preview *ExtraInfoPreview) onInputUrlChange() {
 		fileInfo := preview.tabContext.FileInfos[index].New
 		newUrl := inputUrl
 		if newUrl == "*" {
-			newUrl = preview.tabContext.FileInfos[index].Original.GetUrl()
+			newUrl = preview.tabContext.FileInfos[index].New.GetUrl()
 		}
 		fileInfo.SetUrl(&newUrl)
 	}
