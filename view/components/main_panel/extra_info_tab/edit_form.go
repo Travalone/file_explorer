@@ -116,7 +116,11 @@ func (form *ExtraInfoEditForm) newTagsEditBox() fyne.CanvasObject {
 // 备注输入栏
 func (form *ExtraInfoEditForm) newNoteEditBox() fyne.CanvasObject {
 	noteBox := widget.NewEntry()
-	noteBox.Bind(form.tabContext.InputNote)
+	// entry直接绑定bindData有bug，输入一串中文可能会吞字或溢出
+	//noteBox.Bind(form.tabContext.InputNote)
+	noteBox.OnChanged = func(note string) {
+		form.tabContext.InputNote.Set(note)
+	}
 	noteBox.Validator = func(note string) error {
 		note = strings.TrimSpace(note)
 		// note不超过300字符
