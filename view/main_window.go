@@ -25,9 +25,9 @@ func NewMainWindow() *FeWindow {
 	}
 	left := side_panel.NewSidePanel(feWindow.FeContext)
 	right := main_panel.NewMainPanel(feWindow.FeContext)
-	split := container.NewHSplit(left.Container, right.DocTabs)
+	split := container.NewHSplit(left.Scroll, right.DocTabs)
 	split.Offset = 0.25
-	feWindow.Window.SetContent(split)
+	feWindow.Window.SetContent(container.NewGridWithColumns(1, split))
 	feWindow.Window.Resize(fyne.NewSize(800, 800))
 	return feWindow
 }

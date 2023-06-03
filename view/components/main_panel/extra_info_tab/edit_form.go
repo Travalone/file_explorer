@@ -20,6 +20,7 @@ import (
 type ExtraInfoEditForm struct {
 	*widget.Form
 
+	NoteBox *widget.Entry
 	TagList *packed_widgets.HList
 
 	OnSubmit   func()
@@ -115,13 +116,13 @@ func (form *ExtraInfoEditForm) newTagsEditBox() fyne.CanvasObject {
 
 // 备注输入栏
 func (form *ExtraInfoEditForm) newNoteEditBox() fyne.CanvasObject {
-	noteBox := widget.NewEntry()
+	form.NoteBox = widget.NewEntry()
 	// entry直接绑定bindData有bug，输入一串中文可能会吞字或溢出
 	//noteBox.Bind(form.tabContext.InputNote)
-	noteBox.OnChanged = func(note string) {
+	form.NoteBox.OnChanged = func(note string) {
 		form.tabContext.InputNote.Set(note)
 	}
-	noteBox.Validator = func(note string) error {
+	form.NoteBox.Validator = func(note string) error {
 		note = strings.TrimSpace(note)
 		// note不超过300字符
 		if utf8.RuneCountInString(note) > 300 {
@@ -129,10 +130,10 @@ func (form *ExtraInfoEditForm) newNoteEditBox() fyne.CanvasObject {
 		}
 		return nil
 	}
-	noteBox.MultiLine = true
-	noteBox.SetMinRowsVisible(4)
-	noteBox.Wrapping = fyne.TextWrapBreak //自动换行
-	return noteBox
+	form.NoteBox.MultiLine = true
+	form.NoteBox.SetMinRowsVisible(4)
+	form.NoteBox.Wrapping = fyne.TextWrapBreak //自动换行
+	return form.NoteBox
 }
 
 // 链接输入栏
