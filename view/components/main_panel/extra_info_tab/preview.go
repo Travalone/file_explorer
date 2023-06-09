@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2"
 	"sort"
 	"strconv"
-	"strings"
 )
 
 type ExtraInfoPreview struct {
@@ -79,7 +78,7 @@ func (preview *ExtraInfoPreview) onInputTagsChange() {
 		}
 		sort.Slice(newTags, func(i, j int) bool {
 			if len(newTags[i]) == len(newTags[j]) {
-				return strings.ToLower(newTags[i]) < strings.ToLower(newTags[j])
+				return utils.CmpText(newTags[i], newTags[j])
 			}
 			return len(newTags[i]) < len(newTags[j])
 		})
@@ -137,7 +136,7 @@ func NewExtraInfoPreview(tabContext *store.ExtraInfoTabContext) *ExtraInfoPrevie
 							return a.New.Type < b.New.Type
 						}
 						// 相同时按名称升序
-						return strings.ToLower(a.New.Name) < strings.ToLower(b.New.Name)
+						return utils.CmpText(a.New.Name, b.New.Name)
 					})
 					if inited {
 						preview.ReloadCheckList()
@@ -153,7 +152,7 @@ func NewExtraInfoPreview(tabContext *store.ExtraInfoTabContext) *ExtraInfoPrevie
 				Width:   200,
 				OrderBy: func(desc bool, inited bool) {
 					preview.tabContext.SortFileInfos(func(a, b *model.PreviewFileInfo) bool {
-						res := strings.ToLower(a.New.Name) < strings.ToLower(b.New.Name)
+						res := utils.CmpText(a.New.Name, b.New.Name)
 						if desc {
 							return !res
 						}
@@ -177,7 +176,7 @@ func NewExtraInfoPreview(tabContext *store.ExtraInfoTabContext) *ExtraInfoPrevie
 							return a.New.GetScore() < b.New.GetScore()
 						}
 						// 相同时按名称升序
-						return strings.ToLower(a.New.Name) < strings.ToLower(b.New.Name)
+						return utils.CmpText(a.New.Name, b.New.Name)
 					})
 					if inited {
 						preview.ReloadCheckList()

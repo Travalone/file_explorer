@@ -3,10 +3,10 @@ package file_tab
 import (
 	"file_explorer/common"
 	"file_explorer/common/model"
+	"file_explorer/common/utils"
 	"file_explorer/view/packed_widgets"
 	"file_explorer/view/store"
 	"fyne.io/fyne/v2"
-	"strings"
 )
 
 type FileList struct {
@@ -49,7 +49,7 @@ func NewFileList(tabContext *store.FileTabContext) *FileList {
 							return a.Type < b.Type
 						}
 						// 相同时按名称升序
-						return strings.ToLower(a.Name) < strings.ToLower(b.Name)
+						return utils.CmpText(a.Name, b.Name)
 					})
 					if inited {
 						fileList.ReloadCheckList()
@@ -69,7 +69,7 @@ func NewFileList(tabContext *store.FileTabContext) *FileList {
 						if a.Type != b.Type {
 							return a.Type < b.Type
 						}
-						res := strings.ToLower(a.Name) < strings.ToLower(b.Name)
+						res := utils.CmpText(a.Name, b.Name)
 						if desc {
 							return !res
 						}
@@ -102,7 +102,7 @@ func NewFileList(tabContext *store.FileTabContext) *FileList {
 							return a.Size < b.Size
 						}
 						// 目录、相同大小文件时按名称升序
-						return strings.ToLower(a.Name) < strings.ToLower(b.Name)
+						return utils.CmpText(a.Name, b.Name)
 					})
 					if inited {
 						fileList.ReloadCheckList()
@@ -126,7 +126,7 @@ func NewFileList(tabContext *store.FileTabContext) *FileList {
 							return a.ModifyTime.Unix() < b.ModifyTime.Unix()
 						}
 						// 相同时按名称升序
-						return strings.ToLower(a.Name) < strings.ToLower(b.Name)
+						return utils.CmpText(a.Name, b.Name)
 					})
 					if inited {
 						fileList.ReloadCheckList()
@@ -150,7 +150,7 @@ func NewFileList(tabContext *store.FileTabContext) *FileList {
 							return a.GetScore() < b.GetScore()
 						}
 						// 相同时按名称升序
-						return strings.ToLower(a.Name) < strings.ToLower(b.Name)
+						return utils.CmpText(a.Name, b.Name)
 					})
 					if inited {
 						fileList.ReloadCheckList()

@@ -69,7 +69,7 @@ func (form *ExtraInfoEditForm) newTagInputBox() *widget.Entry {
 		newInputTags := utils.MergeLists(oldInputTags[1:], []string{tag})
 		sort.Slice(newInputTags, func(i, j int) bool {
 			if len(newInputTags[i]) == len(newInputTags[j]) {
-				return strings.ToLower(newInputTags[i]) < strings.ToLower(newInputTags[j])
+				return utils.CmpText(newInputTags[i], newInputTags[j])
 			}
 			return len(newInputTags[i]) < len(newInputTags[j])
 		})

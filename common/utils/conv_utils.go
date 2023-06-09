@@ -3,9 +3,11 @@ package utils
 import (
 	"file_explorer/common/logger"
 	"fmt"
+	"github.com/mozillazg/go-pinyin"
 	"reflect"
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 func Conv2Str(data interface{}) string {
@@ -93,4 +95,26 @@ func Interfaces2Strings(interfaces []interface{}) []string {
 		strings[i] = item.(string)
 	}
 	return strings
+}
+
+func hasCh(s string) bool {
+	for _, ch := range s {
+		if unicode.Is(unicode.Han, ch) {
+			return true
+		}
+	}
+	return false
+}
+
+func ch2Py(s string) string {
+	if !hasCh(s) {
+		return s
+	}
+	return strings.Join(pinyin.LazyConvert(s, nil), "")
+}
+
+func CmpText(s1, s2 string) bool {
+	a := ch2Py(strings.ToLower(s1))
+	b := ch2Py(strings.ToLower(s2))
+	return a < b
 }
