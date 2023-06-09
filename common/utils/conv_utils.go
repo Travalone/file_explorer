@@ -110,7 +110,7 @@ func ch2Py(s string) string {
 	if !hasCh(s) {
 		return s
 	}
-	return strings.Join(pinyin.LazyConvert(s, nil), "")
+	return strings.Join(pinyin.LazyConvert(s, nil), " ")
 }
 
 func CmpText(s1, s2 string) bool {
