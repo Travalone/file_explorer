@@ -28,4 +28,5 @@ func TestOpenUrl(t *testing.T) {
 		logger.Debug("cmd err, cmd=%v, err=%v", cmd.String(), err)
 		return
 	}
+
 }
