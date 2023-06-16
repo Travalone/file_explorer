@@ -5,14 +5,13 @@ import (
 	"file_explorer/common/utils"
 	"file_explorer/view/packed_widgets"
 	"file_explorer/view/store"
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
 type SidePanel struct {
-	*fyne.Container
+	*container.Scroll
 	SearchBox *widget.Entry
 	DirTree   *packed_widgets.Tree
 	//OpList    fyne.CanvasObject
@@ -73,7 +72,8 @@ func NewSidePanel(feContext *store.FeContext) *SidePanel {
 
 	}
 
-	sidePanel.Container = container.NewBorder(sidePanel.SearchBox, nil, nil, nil, sidePanelTabs)
+	sidePanel.Scroll = container.NewHScroll(
+		container.NewBorder(sidePanel.SearchBox, nil, nil, nil, sidePanelTabs))
 
 	return sidePanel
 }

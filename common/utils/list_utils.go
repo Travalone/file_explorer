@@ -2,12 +2,11 @@ package utils
 
 import (
 	"sort"
-	"strings"
 )
 
 func StringsSort(list []string) {
 	sort.Slice(list, func(i, j int) bool {
-		return strings.ToLower(list[i]) < strings.ToLower(list[j])
+		return CmpText(list[i], list[j])
 	})
 }
 

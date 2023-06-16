@@ -1,8 +1,9 @@
 package test
 
 import (
-	"file_explorer/service"
+	"file_explorer/common/logger"
 	"os"
+	"os/exec"
 	"testing"
 )
 
@@ -17,6 +18,15 @@ func TestDeleteFile(t *testing.T) {
 }
 
 func TestOpenUrl(t *testing.T) {
-	service.OpenUrlsWithDefaultWebExplorer([]string{"baidu.com"})
-	service.OpenPathWithDefaultFileExplorer("E://")
+	//service.OpenUrlsWithDefaultWebExplorer([]string{"baidu.com"})
+	//service.OpenPathWithDefaultFileExplorer("E://1 2")
+	cmd := exec.Command("cmd", "/C", "start", "", "explorer")
+	err := cmd.Run()
+	logger.Debug(cmd.String())
+	if err != nil {
+		cmd.String()
+		logger.Debug("cmd err, cmd=%v, err=%v", cmd.String(), err)
+		return
+	}
+
 }

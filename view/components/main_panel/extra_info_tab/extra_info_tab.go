@@ -53,6 +53,8 @@ func NewEditExtraInfoTab(feContext *store.FeContext, extraInfoTabContext *store.
 		tab.statusBar.RefreshStatus()
 		// EditForm 聚合值刷新
 		tab.editForm.TagList.RefreshData()
+		note, _ := tab.tabContext.InputNote.Get()
+		tab.editForm.NoteBox.SetText(note)
 	}).BindData(tab.tabContext.CheckList)
 
 	// 默认全选
@@ -63,7 +65,7 @@ func NewEditExtraInfoTab(feContext *store.FeContext, extraInfoTabContext *store.
 
 	tab.Container = container.NewBorder(
 		container.NewVBox(
-			widget.NewLabel("1. \"*\"表示修改前内容; 2. 双击移除标签；3. 选中项可修改，提交时包含所有项"),
+			widget.NewLabel("1. \"*\"表示修改前内容; 2. 回车添加标签，双击移除标签；3. 选中项可修改，提交时包含所有项"),
 			tab.editForm.Form,
 			tab.toolbar,
 		), tab.statusBar.Label, nil, nil, tab.preview.Table.Table,

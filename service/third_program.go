@@ -11,11 +11,10 @@ func OpenPathWithDefaultFileExplorer(path string) {
 	path = utils.DealWithWindowsPath(path)
 
 	if utils.IsOsWindows() && path == "/" {
-		utils.RunCommand("explorer.exe")
-		return
+		path = "explorer"
 	}
 
-	utils.RunCommand(utils.GetExplorerCommand(), path)
+	utils.RunCommand(utils.GetExplorerCommand(), "", path)
 }
 
 func OpenUrlsWithDefaultWebExplorer(urls []string) {

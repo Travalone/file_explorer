@@ -1,8 +1,8 @@
 package model
 
 import (
+	"file_explorer/common/utils"
 	"sort"
-	"strings"
 )
 
 type Favorites struct {
@@ -35,7 +35,7 @@ func (config *FileExplorerConfig) sortFavorites() {
 
 	sort.Slice(interfaces, func(i, j int) bool {
 		a, b := interfaces[i].(*Favorites), interfaces[j].(*Favorites)
-		return strings.ToLower(a.Name) < strings.ToLower(b.Name)
+		return utils.CmpText(a.Name, b.Name)
 	})
 
 	favorites := make([]*Favorites, len(interfaces))
