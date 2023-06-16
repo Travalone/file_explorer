@@ -53,6 +53,8 @@ func NewEditExtraInfoTab(feContext *store.FeContext, extraInfoTabContext *store.
 		tab.statusBar.RefreshStatus()
 		// EditForm 聚合值刷新
 		tab.editForm.TagList.RefreshData()
+		note, _ := tab.tabContext.InputNote.Get()
+		tab.editForm.NoteBox.SetText(note)
 	}).BindData(tab.tabContext.CheckList)
 
 	// 默认全选
